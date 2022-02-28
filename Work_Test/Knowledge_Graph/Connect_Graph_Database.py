@@ -3,7 +3,7 @@
 from py2neo import Graph, Node, Relationship
 from py2neo.matching import *
 # Graph()中第一个为local host链接，auth为认证，包含 username 和 password
-gragh = Graph('http://localhost:7474',auth=('','123456789'))
+gragh = Graph('http://localhost:7474',auth=('neo4j','123456789'))
 
 # a = Node("hero", name="Clint")  # Node(label, name)
 # b = Node("hero", name="Natasha")

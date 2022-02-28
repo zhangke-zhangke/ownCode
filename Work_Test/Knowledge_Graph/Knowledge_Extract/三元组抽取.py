@@ -3,7 +3,7 @@ import re, os
 import jieba.posseg as pseg
 import jieba
 import time
-
+from py2neo import Graph, Node, Relationship,NodeMatcher
 
 class ExtractEvent:
     def __init__(self):
@@ -87,25 +87,25 @@ class ExtractEvent:
     """指示代词替换，消解处理"""
     #                          词      词性      人名
     def cite_resolution(self, words, postags, persons):
-        print(f"处理词为:{words},词性为:{postags},人名为:{persons}")
+        #print(f"处理词为:{words},词性为:{postags},人名为:{persons}")
         if not persons and 'r' not in set(postags):
-            print("1")
+            #print("1")
             return words, postags
         elif persons and 'r' in set(postags):
-            print("2")
+            #print("2")
             cite_index = postags.index('r')
             if words[cite_index] in {"其", "他", "她", "我"}:
                 words[cite_index] = persons[-1]
                 postags[cite_index] = 'nr'
         elif 'r' in set(postags):
-            print("3")
+            #("3")
             cite_index = postags.index('r')
             if words[cite_index] in {"为何", "何", "如何"}:
                 postags[cite_index] = 'w'
         # 判断首句既有人名又有代词噪声
         drop_r_index = []
         if 'r' and 'nr' in set(postags):
-            print("4")
+            #print("4")
             for i in range(len(words)):
                 if postags[i] == 'r':
                     drop_r_index.append(i)
@@ -129,7 +129,7 @@ class ExtractEvent:
     def get_ips(self, wds, postags):
         ips = []
         phrase_tokspans = self.extract_sentgram(postags, self.IP)
-        print(phrase_tokspans)
+        #print(phrase_tokspans)
         if not phrase_tokspans:
             return []
         phrases = [''.join(wds[i[0]:i[1]]) for i in phrase_tokspans]
@@ -314,7 +314,7 @@ class ExtractEvent:
 
     def phrase_ip(self, content):
         import sys
-        print("原句：\n",content)
+        #print("原句：\n",content)
         spos = []
         events = []
         # 移除噪声数据
@@ -341,7 +341,7 @@ class ExtractEvent:
                     # 移除停用词
                     words, postags = self.clean_wds(words, postags)
                     ips = self.get_ips(words, postags)
-                    print(ips)
+                    #print(ips)
                     persons += person
                     # ips [(n,'分词'),(n,'分词')]
                     for ip in ips:
@@ -353,17 +353,17 @@ class ExtractEvent:
                         words, postags = self.cut_wds(ip[1])
                         # 识别动词短语
                         verb_tokspans, verbs = self.get_vps(words, postags)
-                        print("识别动词短语：",verb_tokspans,verbs)
+                        #print("识别动词短语：",verb_tokspans,verbs)
                         # 识别出介宾短语
                         pp_tokspans, pps = self.get_pps(words, postags)
-                        print("识别介宾短语：",pp_tokspans,pps)
+                        #print("识别介宾短语：",pp_tokspans,pps)
                         tmp_dict = {str(verb[0]) + str(verb[1]): ['V', verbs[idx]] for idx, verb in
                                     enumerate(verb_tokspans)}
-                        print(tmp_dict)
+                        #print(tmp_dict)
                         pp_dict = {str(pp[0]) + str(pp[1]): ['N', pps[idx]] for idx, pp in enumerate(pp_tokspans)}
-                        print(pp_dict)
+                        #print(pp_dict)
                         tmp_dict.update(pp_dict)
-                        print(tmp_dict)
+                        #print(tmp_dict)
                         # sys.exit()
                         sort_keys = sorted([int(i) for i in tmp_dict.keys()])
                         for i in sort_keys:
@@ -402,8 +402,25 @@ class ExtractEvent:
         return events, spos
 
 
-if __name__ == '__main__':
+def del_all_graph(graph):
+    #删除节点
+    # 图中所有节点及关系都删除
+    y = input("请确认是否要删除图库中所有节点及关系（y/n）：")
+    if y == 'y':
+        graph.delete_all()
+        print("已确认删除图库所有节点和关系\n")
+    elif y == 'n':
+        print("已确认不删除图库所有节点和关系\n")
+        pass
+    else:
+        print("=========请输入正确的提示引导=========\n")
+        del_all_graph(graph)
 
+
+
+if __name__ == '__main__':
+    print("非结构化文本提取可视化程序开始")
+    start_time = time.time()
 
     handler = ExtractEvent()
     start = time.time()
@@ -418,11 +435,63 @@ if __name__ == '__main__':
     在相关部门并未禁止在高铁上吃泡面的背景下，吃不吃泡面系个人权利或者个人私德，是不违反公共利益的个人正常生活的一部分。如果认为他人吃泡面让自己不适，最好是请求他人配合并加以感谢，而非站在道德制高点强制干预。只有每个人行使权利时不逾越边界，与他人沟通时好好说话，不过分自我地将幸福和舒适凌驾于他人之上，人与人之间才更趋于平等，公共生活才更趋向美好有序。"""
 
     content7 = """2021年5月29日至6月5日，由中国科学院大学学生会主办，果壳篮球协会协办的中国科学院大学篮球3v3挑战赛圆满落幕，共有来自各个校区的15支男子队伍及4支女子队伍报名参赛。比赛分为两个男子组和女子组两个组别，分小组赛和淘汰赛两个赛段。2021年5月29日，经过一天的紧张较量，女子组所有比赛落下帷幕。随着选手们在场上的一次次精准投篮、巧妙传球，场下喝彩声阵阵。值得一提的是，四支女子队伍中有两支队伍均为校队成员，她们也顺利进入决赛，进行最后的对决，比赛气氛被推向高潮。最终女子组比赛结果如下：“小聋瞎队”获第一名，“打完就解散队”获第二名，“女生1队”获第三名；凭借出色的个人表现，“小聋瞎队”来自中科院微电子所的张雨萌获得MVP（最有价值球员）。2021年6月5日，男子组八强赛在玉泉路校区篮球场拉开帷幕。相较于小组赛，八强赛的比赛更加精彩刺激。参赛队员们在场上积极进攻，全面防守，时而强打内线，时而高举高打，给大家带来了一场场精彩的对决，场下观众喝彩阵阵。经过近2小时的激烈角逐，最终，“一星四射队”和“糊人不唬人队”进入决赛，将进行冠亚军的争夺。中场休息时，来自中国科学院大学WINGS舞社的同学带来了精彩的表演。随着裁判员一声令下，本次3v3篮球赛决赛一触即发。双方球员迅速进入状态。他们默契配合、巧妙进攻，完成了一次又一次精彩的投篮。场外的观众也不甘示弱，一声声喝彩与鼓励响彻球场。最终经过一番激烈的角逐，“一星四射队”以21：15获取本届篮球3v3比赛的冠军。"""
-    content8 = '智器云研究院促进员工成长为技术骨干'
+    content8 = '智器云研究院促进员工成长为技术骨干。智器云研究院隶属智器云'
     content5 = '周杰伦其是一位歌手'
-    content6 = '张科'
+    content6 = '''智器云南京信息科技有限公司，大数据时代的福尔摩斯，中国领先的大数据可视化认知分析专家，提供功能强大的数据处理及情报分析工具及平台，并提供高效专业的情报分析服务及培训。
+    公司具有多年行业实战经验，拥有资深的情报分析产品专家和分析服务团队，并始终保持与国内外顶尖大学和领先公司的交流合作，自主研发符合中国市场需求和安全态势的大数据分析产品。
+    智器云正凭借深厚的技术积累、持续的技术创新、领先的技术优势、以及先进的服务理念，昂首引领整个数据分析行业的高速增长，推动可视化认知分析技术的繁荣发展'''
     content9 = '''反洗钱的制定和实施，对未来中国经济社会的健康有序发展具有重大意义。这主要体现在以下几个方面：一是有利于及时发现和监控洗钱活动，追查并没收犯罪所得，遏制洗钱犯罪及其上游犯罪，维护经济安全和社会稳定；二是有利于消除洗钱行为给金融机构带来的潜在金融风险和法律风险，维护金融安全；三是有利于发现和切断资助犯罪行为的资金来源和渠道，防范新的犯罪行为；四是有利于保护上游犯罪受害人的财产权，维护法律尊严和社会正义；五是有利于参与反洗钱国际合作，维护我国良好的国际形象。'''
-    events, spos = handler.phrase_ip(content9)
+    events, spos = handler.phrase_ip(content6)
     spos = [i for i in spos if i[0] and i[2]]
-    for spo in spos:
-        print(spo)
+
+    # 输出提取的所有三元组关系
+    print(spos)
+
+    # 初始化图库
+    graph = Graph('http://localhost:7474', auth=('neo4j', '123456789'))
+    # 确认是否删除图库所有节点
+    del_all_graph(graph)
+
+    for word_list in spos:
+        # 三元组输出
+        print("准备写入图库当前三元组：",word_list)
+        # 词性列表
+        word_flag = []
+        for i in range(len(word_list)):
+            # 添加三元组中每项到词典
+            jieba.add_word(word_list[i],freq='9999')
+            # 对三元组中每个词进行分词
+            word = jieba.posseg.cut(word_list[i])
+            for i in word:
+                # 添加词性
+                word_flag.append(i.flag)
+
+
+
+        # # 创建节点输出图库
+
+        head = Node(f"{word_flag[0]}", name=f'{word_list[0]}')
+        tail = Node(f"{word_flag[2]}", name=f'{word_list[2]}')
+
+        # 匹配查找图库中节点
+        matcher = NodeMatcher(graph)
+        nodelist = list(matcher.match(f"{word_flag[0]}",name=f'{word_list[0]}'))
+        if len(nodelist) > 0:
+            # 表示节点存在，不需创建新的节点
+            already_header = nodelist[0]  #
+            # 可以直接添加关系
+            entity = Relationship(already_header, f"{word_list[1]}", tail)
+            graph.create(entity)
+        else:
+            # 表示图库中没有存在当前要写入的节点
+            entity = Relationship(head, f"{word_list[1]}", tail)
+            # 创建关系
+            graph.create(entity)
+        print("当前三元组写入结束\n")
+
+    end_time = time.time()
+    print(f"非结构化文本提取可视化程序结束，总耗时（秒）：{end_time-start_time}，写入图库节点数据量：{len(spos)}")
+
+
+
+
