@@ -287,69 +287,125 @@ if __name__ == '__main__':
                                  port=int(3306))
     try:
         with connection.cursor() as cursor:
+            # sql = '''
+            #     SELECT
+            #     客户名称,
+            #     客户编号,
+            #     客户账号,
+            #
+            #     交易天数,
+            #     交易对手总账户数,
+            #     交易总笔数,
+            #     交易总金额,
+            #     交易月数,
+            #     借贷账户比,
+            #     借贷金额比,
+            #     入向交易对手账户数,
+            #     入向交易笔数,
+            #     出向交易对手账户数,
+            #     出向交易笔数,
+            #     对公对私标志,
+            #     对手为个人交易金额,
+            #     对手为个人账户数,
+            #
+            #     最大单笔交易金额,
+            #     最大月交易天数,
+            #     最大月交易总金额,
+            #     最大月交易笔数,
+            #
+            #     CASE WHEN 3号令 = '06' or 3号令 = '6' THEN 1 ELSE 0 END '标签'
+            #
+            #     FROM financeML.`tb_finance_ML_20210923`
+            #     where  对公对私标志 = '0'
+            #
+            #     order by 3号令
+            #
+            #
+            #
+            #
+            # '''
+            # cursor.execute(sql)
+            # res = cursor.fetchall()
+            # col = [item[0] for item in cursor.description]
+            # result_data = pd.DataFrame(res, columns=col)
+            # result_data.fillna(0, inplace=True)
+            # result_data.drop_duplicates(subset=['客户编号','客户账号'],inplace=True,keep='first')
+            # result_data = result_data.apply(pd.to_numeric, errors='ignore')
+            # result_data = result_data.iloc[:]
+
             sql = '''
-                SELECT 
-                客户名称,
-                客户编号,
-                客户账号,
-                
-                交易天数,
-                交易对手总账户数,
-                交易总笔数,
-                交易总金额,
-                交易月数,
-                借贷账户比,
-                借贷金额比,
-                入向交易对手账户数,
-                入向交易笔数,
-                出向交易对手账户数,
-                出向交易笔数,
-                对公对私标志,
-                对手为个人交易金额,
-                对手为个人账户数,
-
-                最大单笔交易金额,
-                最大月交易天数,
-                最大月交易总金额,
-                最大月交易笔数,
-
-                CASE WHEN 3号令 = '06' or 3号令 = '6' THEN 1 ELSE 0 END '标签'
-                
-                FROM financeML.`tb_finance_ML_20210923`
-                where  对公对私标志 = '0'
-                
-                order by 3号令 
-
-
-
-
+                SELECT id,tx_id,tx_dt,biz_type,biz_line,tx_amt_rmb,abstract_cd,detail_num
+                FROM P20210257_JS_FXQ_TRAN_20210425_0001
+            
             '''
             cursor.execute(sql)
             res = cursor.fetchall()
             col = [item[0] for item in cursor.description]
-            result_data = pd.DataFrame(res, columns=col)
-            result_data.fillna(0, inplace=True)
-            result_data.drop_duplicates(subset=['客户编号','客户账号'],inplace=True,keep='first')
-            result_data = result_data.apply(pd.to_numeric, errors='ignore')
-            # result_data = result_data.iloc[:]
+            result_data1 = pd.DataFrame(res, columns=col)
+            result_data1.fillna(0, inplace=True)
+
+            sql = '''
+                SELECT id,CARDNO,txn_dt,acdn_cd
+                FROM P20210257_JS_FXQ_ACCT_ACDN_20210425_0001
+            
+            '''
+            cursor.execute(sql)
+            res = cursor.fetchall()
+            col = [item[0] for item in cursor.description]
+            result_data2 = pd.DataFrame(res, columns=col)
+            result_data2.fillna(0, inplace=True)
+
+
     finally:
         cursor.close()
 
-    target = result_data['标签']
-    data = result_data.iloc[:, 3:-1]
-    data = data.fillna(0)
-    print(target.to_frame().value_counts())
+    # # target = result_data['标签']
+    # data = result_data
+    # data = data.fillna(0)
+    # # print(target.to_frame().value_counts())
 
-    # 0
-    # 5312
-    # 1
-    # 1265
+    print(result_data1.info())
+    print(result_data2.info())
 
-    # 训练，并保存模型
-    train(data,target)
+    import featuretools as ft
 
-    # 测试，并输出效果指标
-    test(data,target)
+
+
+
+    result_data1 = result_data1.apply(pd.to_numeric, errors='ignore')
+    result_data2 = result_data2.apply(pd.to_numeric, errors='ignore')
+
+    es = ft.EntitySet(id='test')
+    es = es.entity_from_dataframe(entity_id='result_data1', dataframe=result_data1,index='tx_id',time_index='tx_dt')
+                              # ,variable_types={'FRZ_AFFR_SN': ft.variable_types.Categorical,
+                              #                 'DEP_FRZ_TPCD':ft.variable_types.Categorical})
+    es = es.entity_from_dataframe(entity_id='result_data2', dataframe=result_data2,index='id',time_index='txn_dt')
+                              # ,variable_types={'FRZ_AFFR_SN': ft.variable_types.Categorical,
+                              #                 'DEP_FRZ_TPCD':ft.variable_types.Categorical})
+
+
+    # 表关联
+    r_client_previous = ft.Relationship(es['result_data1']['tx_id'], es['result_data2']['CARDNO'])
+    # 将关系添加到实体集
+    es = es.add_relationship(r_client_previous)
+
+    features, feature_names = ft.dfs(entityset=es, target_entity='result_data1',max_depth=1)
+    # features, feature_names = ft.dfs(entityset=es, target_entity='data',agg_primitives=['mean', 'max', 'percent_true', 'last'],
+    #                              trans_primitives=[ 'month'])
+    print(len(feature_names))
+    print(np.c_[feature_names])
+
+
+    # # 0
+    # # 5312
+    # # 1
+    # # 1265
+    #
+    # # 训练，并保存模型
+    # train(data,target)
+    #
+    # # 测试，并输出效果指标
+    # test(data,target)
 
 
 
