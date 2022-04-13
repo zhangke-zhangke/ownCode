@@ -14,8 +14,8 @@ try:
             from
             (
                 select card_no,target_type,target_value
-                from et_target_info
-                where case_id  = '5d009343_5ab3_4a0d_9c2b_e1c31266c1d5'
+                from et_target_info_202204
+                where case_id  = '3b97b673_73d0_4ce3_9630_dccd2ddf2613'
             ) a
             inner join
             (
