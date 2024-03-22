@@ -1,0 +1,233 @@
+{
+    "exe": "node2vecter.py",
+    "form": [
+        {
+            "type": "group",
+            "title": "通用",
+            "field": "common",
+            "value": [],
+            "props": {
+                "max": 1,
+                "min": 1,
+                "rules": [
+                    {
+                        "type": "col",
+                        "children": [
+                            {
+                                "type": "col",
+                                "children": [
+                                    {
+                                        "type": "inputs",
+                                        "field": "mutiCondition",
+                                        "title": "",
+                                        "value": [
+                                            false
+                                        ]
+                                    },
+                                    {
+                                        "type": "input",
+                                        "title": "文件路径",
+                                        "field": "filePath",
+                                        "value": "",
+                                        "col": {
+                                            "span": 24
+                                        },
+                                        "labelCol": {
+                                            "span": 6
+                                        },
+                                        "wrapperCol": {
+                                            "span": 18
+                                        },
+                                        "props": {
+                                            "type": "text",
+                                            "placeholder": "请输入参数"
+                                        },
+                                        "validate": [
+                                            {
+                                                "required": true,
+                                                "message": "请输入列名",
+                                                "trigger": "blur"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "validate": [
+                {
+                    "required": true
+                }
+            ]
+        },
+        {
+            "type": "group",
+            "title": "输入",
+            "field": "inputs",
+            "value": [],
+            "props": {
+                "max": 1,
+                "min": 1,
+                "rules": [
+                    {
+                        "type": "col",
+                        "children": [
+                            {
+                                "type": "input",
+                                "title": "输入节点ID",
+                                "field": "fromId",
+                                "value": "123",
+                                "col": {
+                                    "span": 24
+                                },
+                                "labelCol": {
+                                    "span": 6
+                                },
+                                "wrapperCol": {
+                                    "span": 18
+                                },
+                                "props": {
+                                    "type": "text",
+                                    "disabled": true
+                                }
+                            },
+                            {
+                                "type": "input",
+                                "title": "输入节点名",
+                                "field": "fromName",
+                                "value": "test",
+                                "col": {
+                                    "span": 24
+                                },
+                                "labelCol": {
+                                    "span": 6
+                                },
+                                "wrapperCol": {
+                                    "span": 18
+                                },
+                                "props": {
+                                    "type": "text",
+                                    "disabled": true
+                                }
+                            },
+                            {
+                                "type": "input",
+                                "title": "列名和类型",
+                                "field": "columns",
+                                "value": "",
+                                "col": {
+                                    "span": 24
+                                },
+                                "labelCol": {
+                                    "span": 6
+                                },
+                                "wrapperCol": {
+                                    "span": 18
+                                },
+                                "props": {
+                                    "type": "textarea",
+                                    "placeholder": "name<String>，多个列名用半角英文逗号分隔，默认类型为String",
+                                    "disabled": true
+                                },
+                                "validate": [
+                                    {
+                                        "required": false
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "hidden",
+                                "field": "usedColumns",
+                                "value": "",
+                                "props": {
+                                    "type": "text",
+                                    "placeholder": "请输入使用的列，多个以半角逗号分隔。空代表所有"
+                                },
+                                "validate": [
+                                    {
+                                        "required": false
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "validate": [
+                {
+                    "required": true
+                }
+            ]
+        },
+        {
+            "type": "group",
+            "title": "输出列",
+            "field": "outputColumns",
+            "value": [],
+            "props": {
+                "max": 1,
+                "min": 1,
+                "rules": [
+                    {
+                        "type": "col",
+                        "children": [
+                            {
+                                "type": "hidden",
+                                "title": "",
+                                "field": "immutableColumns",
+                                "value": "",
+                                "col": {
+                                    "span": 24
+                                },
+                                "labelCol": {
+                                    "span": 6
+                                },
+                                "wrapperCol": {
+                                    "span": 18
+                                },
+                                "props": {
+                                    "type": "textarea",
+                                    "placeholder": "输出列名，多个列名用半角英文逗号分隔",
+                                    "disabled": true
+                                }
+                            },
+                            {
+                                "type": "input",
+                                "title": "可变输出",
+                                "field": "mutableColumns",
+                                "value": "",
+                                "col": {
+                                    "span": 24
+                                },
+                                "labelCol": {
+                                    "span": 6
+                                },
+                                "wrapperCol": {
+                                    "span": 18
+                                },
+                                "props": {
+                                    "type": "textarea",
+                                    "placeholder": "name<String>，多个列名用半角英文逗号分隔，默认类型为Stringg"
+                                },
+                                "validate": [
+                                    {
+                                        "required": false,
+                                        "message": "向造币人员发货次数阈值 is required!"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "validate": [
+                {
+                    "required": true,
+                    "message": "outputColumn is required"
+                }
+            ]
+        }
+    ]
+}
