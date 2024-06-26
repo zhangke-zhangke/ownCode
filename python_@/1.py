@@ -3,24 +3,29 @@ import time
 
 
 
-def count_time(func):
-    def wrapper():
-        t1 = time.time()
-        func()
-        print("执行时间为：", time.time() - t1)
+def timer(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
 
+        print(f'{func.__name__} executed in {end_time - start_time} seconds')
+        return result
     return wrapper
 
-@count_time
-def baiyu() -> None:
-    print("我是攻城狮白玉")
+
+
+
+@timer
+def my_function(*args,**kwargs):
+    print('Function executed')
     time.sleep(2)
+    print(args)
+    for arg in args:
+        print(arg)
+    print(kwargs)
+    for key,value in kwargs.items():
+        print(key,value)
 
-
-if __name__ == '__main__':
-    # baiyu = count_time(baiyu)  # 因为装饰器 count_time(baiyu) 返回的时函数对象 wrapper，这条语句相当于  baiyu = wrapper
-    # baiyu()  # 执行baiyu()就相当于执行wrapper()
-
-
-    baiyu()
-
+import numpy
+my_function(2,1,0,name='aaa')
