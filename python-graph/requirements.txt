@@ -1,0 +1,10 @@
+python-louvain==0.16
+Flask==3.0.3
+infomap==2.7.1
+matplotlib==3.8.3
+networkx==3.2.1
+pandas==2.2.2
+PyHive==0.7.0
+PyMySQL==1.1.0
+python_louvain==0.16
+SQLAlchemy==2.0.29
