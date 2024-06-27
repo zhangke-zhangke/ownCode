@@ -27,9 +27,21 @@ class applog():
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 print(exc_type, exc_value, exc_traceback)
 
-        formatter = logging.Formatter(f"[python-graph] - [%(asctime)s] - [%(filename)s:%(lineno)d] - [flask-thread-%(thread)d] - [%(levelname)s] - %(message)s")
-        handler = TimedRotatingFileHandler(f"{app_log_path}/flask.log", when="midnight", interval=1, backupCount=15,encoding="UTF-8", delay=False, utc=True)
+        formatter = logging.Formatter(f"python-graph - %(asctime)s - %(filename)s:%(lineno)d - flask-thread-%(thread)d - %(levelname)s - %(message)s")
+        handler = TimedRotatingFileHandler(f"{app_log_path}/flask.log", when="midnight", interval=1, backupCount=15,encoding="UTF-8")
         handler.setFormatter(formatter)
+        handler.suffix = "%Y%m%d"
 
         return handler
+
+    @staticmethod
+    def get_logger(app):
+        r'''
+        :param app: Flask app
+        :return:
+        '''
+        logger = logging.getLogger("python-graph")
+        logger.setLevel(logging.DEBUG)
+        logger.addHandler(applog.get_handler(current_app.root_path))
+        return logger
 
