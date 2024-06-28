@@ -22,9 +22,8 @@ app.secret_key = 'my_secret_key'
 app.register_blueprint(creat_graph,url_prefix='/pythonGraph/creat',)
 # 日志
 log_handler = applog.get_handler(os.path.dirname(__file__))
-app.logger.setLevel(logging.DEBUG)
 app.logger.addHandler(log_handler)
-
+app.logger.setLevel(logging.INFO)
 
 
 

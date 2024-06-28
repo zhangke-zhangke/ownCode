@@ -8,8 +8,10 @@ import sys
 
 
 class applog():
-
-    def __int__(self):
+    r'''
+        日志模块
+    '''
+    def __init__(self):
         pass
 
     @staticmethod
@@ -23,14 +25,16 @@ class applog():
         if not os.path.exists(app_log_path):
             try:
                 os.makedirs(app_log_path)
-            except Exception:
-                exc_type, exc_value, exc_traceback = sys.exc_info()
-                print(exc_type, exc_value, exc_traceback)
-
+            except Exception as e:
+                print(f'创建日志文件夹失败：{e}')
+                sys.exit(1)
+        # 日志格式设置
         formatter = logging.Formatter(f"python-graph - %(asctime)s - %(filename)s:%(lineno)d - flask-thread-%(thread)d - %(levelname)s - %(message)s")
         handler = TimedRotatingFileHandler(f"{app_log_path}/flask.log", when="midnight", interval=1, backupCount=15,encoding="UTF-8")
         handler.setFormatter(formatter)
         handler.suffix = "%Y%m%d"
+        # 解决第二天日志文件无法创建的问题
+        handler.filename = f"{app_log_path}/flask.log"
 
         return handler
 
