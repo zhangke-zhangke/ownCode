@@ -1,0 +1,37 @@
+
+
+// 普通类
+public class xxx {}
+
+// 继承类
+public class xxx extends yyy {}
+
+// 接口类（接口类的方法默认都是抽象方法）
+public interface xx {}
+
+
+// 定义实现序列化类（可以用在DTO接收函数返回值）
+public class xxx implements Serializable {}
+
+
+spring boot项目架构
+	java
+		controller层
+			@RestReuest注解标明，定义http接口方法
+		service层
+			serviceImpl层
+			继承接口类，实现相关抽象方法
+			@Service注解标明，定义interface抽象方法（可选）
+		mapping层
+			mybaits中xml配置namespace文件
+		dto层
+			数据交换层，用来定义一些数据库实体表，增加字典校验等
+	resource
+		资源文件（如mybaits的xml配置文件）
+
+
+
+
+
+
+

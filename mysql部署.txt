@@ -1,0 +1,8 @@
+1、官网按照系统、版本下载mysql安装包（或在有网的环境，apt-get install）
+2、服务器目录解压mysql安装包，可以新建一个目录作为mysql_home，将压缩包里的文件移到新目录中。
+3、配置环境变量，初始化数据库，配置用户组及用户。最后启动mysql服务 ./bin/mysqld_safe&
+4、mysql -u root -p 输入初始化数据库后返回的初始密码登录，登录进去后先修改一次密码。
+5、/etc/my.cnf或/etc/mysql/my.cnf配置数据库配置。
+6、systemctl start/stop/restart mysql 后台运行mysql
+
+
